@@ -2,7 +2,7 @@
 
 process.env.STORAGE = 'mongo';
 
-const jwt = require('jsonwebtoken');
+const jsonwebtoken = require('jsonwebtoken');
 
 const server = require('../../../src/app.js').server;
 const supergoose = require('../../supergoose.js');

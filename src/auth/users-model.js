@@ -1,8 +1,9 @@
 'use strict';
 
 const mongoose = require('mongoose');
-// bcrypt
-// jwt
+const bcrypt = require('bcrypt');
+const jsonWebToken = require('jsonwebtoken');
+
 
 const users = new mongoose.Schema({
   username: {type: String, required: true, unique: true},
@@ -19,26 +20,16 @@ users.pre('save', function(next) {
       this.password = hashedPassword;
       next();
     })
-  //   .catch(error => {throw error})
-  // bcrypt.hash(this.password,10)
-  //   .then(hashedPassword => {
-  //     this.password = hashedPassword;
-  //     next();
-  //   })
-  //   .catch( error => {throw error;} );
 });
 
 users.statics.authenticateBasic = function(auth) {
   let query = {username:auth.username};
   return this.findOne(query)
     .then(user => {
-      if(user){
-        return user.comparePassword(auth.password);
-      }else{
-        return false;
-      }
-    })
+      return user ? user.comparePassword(auth.password) : false;
+      })
     .catch(console.error);
+    // eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjVkNjQ2NTcwZTMwMjNjMTI2YTk2NDI0NCIsImNhcGFiaWxpdGllcyI6W10sImlhdCI6MTU2Njg2MDY1Nn0.j6d4dR2JMD7OPo7W-VjZJOWfjye2wPh4mnr-W79-hCs
 };
 
 // Compare a plain text password against the hashed one we have saved
@@ -51,9 +42,9 @@ users.methods.comparePassword = function(password) {
 users.methods.generateToken = function() {
   const tokenData = {
     id:this._id,
-    capabilities: (this.acl && this.acl.capabilities) || [],
+    capabilities: [],
   };
-  return jwt.sign(tokenData, process.env.SECRET || 'testPassword' );
+  return jsonWebToken.sign(tokenData, process.env.SECRET || 'testPassword' );
   //sign makes the token 
 };
 
